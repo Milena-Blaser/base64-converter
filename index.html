@@ -1,49 +1,49 @@
-<script>
-  async function uploadImage() {
-    const input = document.getElementById('imageInput');
-    const file = input.files[0];
-    if (!file) {
-      alert("Please select an image");
-      return;
-    }
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>OCR Upload</title>
+  </head>
+  <body>
+    <input type="file" id="fileInput" accept="image/*" />
+    <p id="result">Select an image to begin.</p>
 
-    // Convert to Base64 for sending back
-    const toBase64 = file => new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result); // includes data:image/jpeg;base64,...
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+    <script>
+      const apiUrl = 'https://ocr-extract-text.p.rapidapi.com/ocr';
+      const rapidApiKey = '11083d3e5emsh163c76e8056d4a5p1d3e0cjsnba8f2be5464a';
 
-    const base64Image = await toBase64(file);
+      document.getElementById('fileInput').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
 
-    const formData = new FormData();
-    formData.append('file', file);
+        const formData = new FormData();
+        formData.append('file', file);
 
-    try {
-      const response = await fetch('https://ocr-extract-text.p.rapidapi.com/ocr/file', {
-        method: 'POST',
-        headers: {
-          'X-RapidAPI-Key': '11083d3e5emsh163c76e8056d4a5p1d3e0cjsnba8f2be5464a',
-          'X-RapidAPI-Host': 'ocr-extract-text.p.rapidapi.com'
-        },
-        body: formData
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'X-RapidAPI-Key': rapidApiKey,
+              'X-RapidAPI-Host': 'ocr-extract-text.p.rapidapi.com'
+            },
+            body: formData
+          });
+
+          const data = await response.json();
+          const text = data.text || 'No text found';
+
+          document.getElementById('result').innerText = text;
+          if (window.postMessage) {
+            window.postMessage(text, '*');
+          }
+
+        } catch (error) {
+          document.getElementById('result').innerText = 'Error: ' + error.message;
+          if (window.postMessage) {
+            window.postMessage('ERROR: ' + error.message, '*');
+          }
+        }
       });
-
-      const result = await response.json();
-      const extractedText = result.text || "No text found.";
-
-      // ✅ Send both image and text as a JSON string
-      const payload = {
-        image: base64Image,
-        text: extractedText
-      };
-
-      window.ReactNativeWebView?.postMessage(JSON.stringify(payload));
-    } catch (err) {
-      window.ReactNativeWebView?.postMessage(JSON.stringify({
-        error: err.message
-      }));
-    }
-  }
-</script>
+    </script>
+  </body>
+</html>
