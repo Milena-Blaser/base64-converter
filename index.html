@@ -1,24 +1,59 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding: 20px;
+        background-color: #f8f8f8;
+        color: #084D43;
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+      }
+
+      .custom-file-button {
+        display: inline-block;
+        padding: 12px 20px;
+        background-color: #85AD7B;
+        color: white;
+        font-size: 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+
+      .custom-file-button:hover {
+        background-color: #1976D2;
+      }
+
+      #resultText {
+        margin-top: 20px;
+        font-size: 18px;
+      }
+    </style>
+  </head>
   <body>
-    <input type="file" id="imageInput" accept="image/*" />
-    <button onclick="uploadImage()">Upload</button>
+    <h1>Scan date</h1>
+    <input type="file" id="imageInput" hidden />
+    <label for="imageInput" class="custom-file-button">Choose Image</label>
     <p id="resultText"></p>
 
     <script>
-      async function uploadImage() {
-        const input = document.getElementById('imageInput');
-        const file = input.files[0];
-
+      document.getElementById('imageInput').addEventListener('change', async function () {
+        const file = this.files[0];
         if (!file) {
           alert('Please choose a file');
           return;
         }
 
-        // Convert to base64 so you can send the image to Thunkable
         const reader = new FileReader();
         reader.onload = async () => {
-          const base64Image = reader.result; // data:image/...;base64,...
+          const base64Image = reader.result;
 
           const formData = new FormData();
           formData.append('image', file);
@@ -36,7 +71,6 @@
             const result = await response.json();
             const text = result.text || 'No text found';
 
-            // Send result + image back to Thunkable
             if (window.ReactNativeWebView) {
               window.ReactNativeWebView.postMessage(JSON.stringify({
                 text: text,
@@ -52,8 +86,8 @@
           }
         };
 
-        reader.readAsDataURL(file); // Start reading the file as base64
-      }
+        reader.readAsDataURL(file);
+      });
     </script>
   </body>
 </html>
