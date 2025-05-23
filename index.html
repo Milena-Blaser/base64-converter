@@ -71,6 +71,7 @@
 
             const result = await response.json();
             const text = result.text || 'No text found';
+            console.log("Posting to ReactNativeWebView:", { text, image: base64Image });
 
             if (window.ReactNativeWebView) {
               window.ReactNativeWebView.postMessage(JSON.stringify({
