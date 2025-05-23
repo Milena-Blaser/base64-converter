@@ -50,6 +50,7 @@
           alert('Please choose a file');
           return;
         }
+        let base64Image = "";
 
         const reader = new FileReader();
         reader.onload = async () => {
